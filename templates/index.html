@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Non-Linear Agent</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .robot-icon {
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            background: #4ade80;
+            border-radius: 50%;
+        }
+
+        .main-content {
+            padding: 20px;
+        }
+
+        .calculation-input {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 15px;
+            font-size: 16px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #d97706;
+        }
+
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #64748b;
+        }
+
+        .btn-secondary:hover {
+            background: #cbd5e1;
+        }
+
+        .query-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .tag {
+            background: #f1f5f9;
+            color: #475569;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .tag.active {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .chat-container {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            min-height: 300px;
+        }
+
+        .chat-message {
+            margin-bottom: 15px;
+        }
+
+        .message-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .user-avatar {
+            width: 24px;
+            height: 24px;
+            background: #f59e0b;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .timestamp {
+            font-size: 11px;
+            color: #94a3b8;
+            margin-left: auto;
+        }
+
+        .message-content {
+            font-size: 14px;
+            line-height: 1.5;
+            color: #334155;
+        }
+
+        .response-section {
+            margin-top: 15px;
+        }
+
+        .response-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #1e293b;
+        }
+
+        .math-solution {
+            background: white;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 13px;
+            line-height: 1.6;
+            color: #475569;
+        }
+
+        .metadata {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-size: 11px;
+            color: #94a3b8;
+        }
+
+        .tools-section {
+            background: #f8fafc;
+            padding: 20px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .tool-item {
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            background: white;
+        }
+
+        .tool-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .tool-icon {
+            width: 40px;
+            height: 40px;
+            margin: 0 auto 10px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .tool-icon.math { background: #fee2e2; color: #dc2626; }
+        .tool-icon.text { background: #fef3c7; color: #d97706; }
+        .tool-icon.translate { background: #d1fae5; color: #059669; }
+        .tool-icon.chat { background: #e0e7ff; color: #3730a3; }
+
+        .tool-title {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 5px;
+            color: #1e293b;
+        }
+
+        .tool-description {
+            font-size: 11px;
+            color: #64748b;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>
+                <div class="robot-icon">🤖</div>
+                Non-Linear Agent
+            </h1>
+            <div class="status-bar">
+                <div class="status-item">
+                    <div class="status-dot"></div>
+                    Agent Ready
+                </div>
+                <div class="status-item">
+                    Model: mistral
+                </div>
+                <div class="status-item">
+                    Connection: Connected
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="calculation-input">
+                <span>Calculate: 137 * 42 + 85</span>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-primary">SEND QUERY</button>
+                <button class="btn btn-secondary">CLEAR</button>
+            </div>
+
+            <div class="query-tags">
+                <span class="tag">📊 Math: 137 * 42 + 85</span>
+                <span class="tag">🔄 Translation</span>
+                <span class="tag">📝 Summarization</span>
+                <span class="tag">❓ General Query</span>
+            </div>
+
+            <div class="chat-container">
+                <div class="chat-message">
+                    <div class="message-header">
+                        <div class="user-avatar">USER</div>
+                        <span class="timestamp">12:34:21 PM</span>
+                    </div>
+                    <div class="message-content">
+                        <strong>Query:</strong> Calculate 137 * 42 + 85
+                    </div>
+                </div>
+
+                <div class="response-section">
+                    <div class="response-title">Response:</div>
+                    <div class="response-title">Math Solution:</div>
+                    <div class="math-solution">
+                        I'll solve this step by step using the order of operations (PEMDAS/BODMAS):
+
+                        <br><br><strong>Step 1:</strong> First, perform the multiplication: 137 × 42
+                        <br>137 × 42 = 5,754
+                        <br><br>Breaking this down:
+                        <br>• 137 × 40 = 5,480
+                        <br>• 137 × 2 = 274
+                        <br>• 5,480 + 274 = 5,754
+
+                        <br><br><strong>Step 2:</strong> Add the remaining number: 5,754 + 85
+                        <br>5,754 + 85 = 5,839
+
+                        <br><br><strong>Final Answer:</strong> 137 × 42 + 85 = 5,839
+
+                        <br><br><em>Verification:</em> We can double-check by confirming 137 × 42 = 5,754, then 5,754 + 85 = 5,839 ✓
+                    </div>
+                   
+                    <div class="metadata">
+                        <div>
+                            <strong>Metadata</strong><br>
+                            routing_decision: <br>
+                            math_type: <br>
+                            result_path:
+                        </div>
+                        <div>
+                            Mathematical operation detected<br>
+                            Arithmetic<br>
+                            router → math → final_answer
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tools-section">
+            <div class="tools-grid">
+                <div class="tool-item">
+                    <div class="tool-icon math">📊</div>
+                    <div class="tool-title">Math Solver</div>
+                    <div class="tool-description">Solve arithmetic equations and word problems using step-by-step methods</div>
+                </div>
+                <div class="tool-item">
+                    <div class="tool-icon text">📄</div>
+                    <div class="tool-title">Text Summarizer</div>
+                    <div class="tool-description">Create concise summaries of long text content</div>
+                </div>
+                <div class="tool-item">
+                    <div class="tool-icon translate">🌐</div>
+                    <div class="tool-title">Translator</div>
+                    <div class="tool-description">Translate text between different languages</div>
+                </div>
+                <div class="tool-item">
+                    <div class="tool-icon chat">💬</div>
+                    <div class="tool-title">General Chat</div>
+                    <div class="tool-description">Ask questions and get comprehensive answers</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Add basic interactivity
+        document.addEventListener('DOMContentLoaded', function() {
+            const sendBtn = document.querySelector('.btn-primary');
+            const clearBtn = document.querySelector('.btn-secondary');
+            const toolItems = document.querySelectorAll('.tool-item');
+
+            sendBtn.addEventListener('click', function() {
+                this.textContent = 'Processing...';
+                setTimeout(() => {
+                    this.textContent = 'SEND QUERY';
+                }, 1000);
+            });
+
+            clearBtn.addEventListener('click', function() {
+                const input = document.querySelector('.calculation-input span');
+                input.textContent = 'Enter calculation...';
+            });
+
+            toolItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const title = this.querySelector('.tool-title').textContent;
+                    console.log(`Selected tool: ${title}`);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
